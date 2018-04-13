@@ -69,6 +69,9 @@ export default class Basic extends Component {
       <View style={styles.container}>
         <Text style={styles.title}>React Native Sortable List</Text>
         <SortableList
+          onScroll={console.log}
+          onScrollEndDrag={console.log}
+          onScrollBeginDrag={console.log}
           style={styles.list}
           contentContainerStyle={styles.contentContainer}
           data={data}

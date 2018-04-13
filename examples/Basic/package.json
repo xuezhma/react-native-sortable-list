@@ -9,6 +9,6 @@
   "dependencies": {
     "react": "16.0.0",
     "react-native": "0.50.3",
-   	"react-native-sortable-list": "0.0.17"
+    "react-native-sortable-list": "xuezhma/react-native-sortable-list.git#a887178f5a66c4a4ae3d963c86c25a226d0efa12"
   }
 }
