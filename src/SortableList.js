@@ -205,8 +205,9 @@ export default class SortableList extends Component {
           contentContainerStyle={contentContainerStyle}
           scrollEventThrottle={2}
           scrollEnabled={scrollEnabled}
-          onScroll={this._onScroll}>
-          {this._renderHeader()}
+          onScroll={this._onScroll}
+          onScrollEndDrag={this._onScrollEndDrag}
+          onScrollBeginDrag={this._onScrollBeginDrag}>
           <View style={innerContainerStyle}>
             {this._renderRows()}
           </View>
@@ -609,7 +610,16 @@ export default class SortableList extends Component {
 
   _onScroll = ({nativeEvent: {contentOffset}}) => {
       this._contentOffset = contentOffset;
+      if (this.props.onScroll) this.props.onScroll(contentOffset);
   };
+
+  _onScrollEndDrag = (({nativeEvent: {contentOffset}}) => {
+    if (this.props.onScrollEndDrag) this.props.onScrollEndDrag(contentOffset);
+  });
+
+  _onScrollBeginDrag = (({nativeEvent: {contentOffset}}) => {
+    if (this.props.onScrollBeginDrag) this.props.onScrollBeginDrag(contentOffset);
+  });
 
   _onRefContainer = (component) => {
     this._container = component;
