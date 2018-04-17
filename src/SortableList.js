@@ -261,6 +261,7 @@ export default class SortableList extends Component {
           onPress={this._onPressRow.bind(this, key)}
           onRelease={this._onReleaseRow.bind(this, key)}
           onMove={this._onMoveRow}
+          onDelete={() => this._onDelete(data[key].props.item.id)}
           manuallyActivateRows={this.props.manuallyActivateRows}>
           {renderRow({
             key,
@@ -620,6 +621,10 @@ export default class SortableList extends Component {
   _onScrollBeginDrag = (({nativeEvent: {contentOffset}}) => {
     if (this.props.onScrollBeginDrag) this.props.onScrollBeginDrag(contentOffset);
   });
+
+  _onDelete = id => {
+    if (this.props.onDelete) this.props.onDelete(id);
+  }
 
   _onRefContainer = (component) => {
     this._container = component;

@@ -1,6 +1,6 @@
 import React, {Component, cloneElement} from 'react';
 import PropTypes from 'prop-types';
-import {Animated, PanResponder, StyleSheet} from 'react-native';
+import {Animated, PanResponder, StyleSheet, Text, TouchableOpacity} from 'react-native';
 import {shallowEqual} from './utils';
 
 export default class Row extends Component {
@@ -27,6 +27,9 @@ export default class Row extends Component {
 
     // Will be called, when user release the view.
     onRelease: PropTypes.func,
+
+    // Will be called, when user click delete.
+    onDelete: PropTypes.func,
   };
 
   static defaultProps = {
@@ -44,15 +47,18 @@ export default class Row extends Component {
   }
 
   _panResponder = PanResponder.create({
-    onStartShouldSetPanResponder: () => !this._isDisabled(),
+    onStartShouldSetPanResponder: (e, gestureState) => {
+      this._isMovingHorizontal = null;
+      this._totalMovment = 0;
+      return !this._isDisabled()
+    },
 
     onMoveShouldSetPanResponder: (e, gestureState) => {
       if (this._isDisabled()) return false;
 
       const vy = Math.abs(gestureState.vy)
       const vx = Math.abs(gestureState.vx)
-
-      return this._active && (this.props.horizontal ? vx > vy : vy > vx);
+      return this._active;
     },
 
     onShouldBlockNativeResponder: () => {
@@ -95,7 +101,16 @@ export default class Row extends Component {
       }
 
       const elementMove = this._mapGestureToMove(this._prevGestureState, gestureState);
-      this.moveBy(elementMove);
+      if (this._isMovingHorizontal === null ) {
+        this._isMovingHorizontal = Math.abs(elementMove.dx) > Math.abs(elementMove.dy)
+      }
+      if (this._isMovingHorizontal) {
+        this.moveBy({dx: elementMove.dx})
+        this._totalMovment += elementMove.dx
+      } else {
+        this.moveBy({dy: elementMove.dy})
+        this._totalMovment += elementMove.dy
+      }
       this._prevGestureState = {...gestureState};
 
       if (this.props.onMove) {
@@ -145,7 +160,11 @@ export default class Row extends Component {
   componentWillReceiveProps(nextProps) {
     if (!this._active && !shallowEqual(this._location, nextProps.location)) {
       const animated = !this._active && nextProps.animated;
-      this._relocate(nextProps.location, animated);
+      if (this._totalMovment <  -75) {
+        this._relocate({...nextProps.location, x: -170}, true)
+      } else {
+        this._relocate(nextProps.location, animated)
+      }
     }
   }
 
@@ -164,7 +183,7 @@ export default class Row extends Component {
   }
 
   render() {
-    const {children, style, horizontal} = this.props;
+    const {children, style, horizontal, onDelete} = this.props;
     const rowStyle = [
       style, styles.container, this._animatedLocation.getLayout(),
       horizontal ? styles.horizontalContainer : styles.verticalContainer,
@@ -181,6 +200,9 @@ export default class Row extends Component {
           })
           : children
         }
+        <TouchableOpacity style={{marginLeft: 10, marginTop: 5, width: 150, height: 120, backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center'}} onPress={onDelete}>
+          <Text style={{color: 'red', fontSize: 26}}>Delete</Text>
+        </TouchableOpacity>
       </Animated.View>
     );
   }
@@ -191,7 +213,7 @@ export default class Row extends Component {
 
   _relocate(nextLocation, animated) {
     this._location = nextLocation;
-
+    if (nextLocation.x === 0 && nextLocation === 0) return;
     if (animated) {
       this._isAnimationRunning = true;
       Animated.timing(this._animatedLocation, {
@@ -216,9 +238,10 @@ export default class Row extends Component {
   };
 
   _mapGestureToMove(prevGestureState, gestureState) {
-    return this.props.horizontal
-      ? {dx: gestureState.moveX - prevGestureState.moveX}
-      : {dy: gestureState.moveY - prevGestureState.moveY};
+    return {
+      dx: gestureState.moveX - prevGestureState.moveX,
+      dy: gestureState.moveY - prevGestureState.moveY
+    }
   }
 
   _isDisabled() {
@@ -250,13 +273,14 @@ export default class Row extends Component {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
+    flexDirection: 'row',
   },
   horizontalContainer: {
-    top: 0,
-    bottom: 0,
+    // top: 0,
+    // bottom: 0,
   },
   verticalContainer: {
-    left: 0,
-    right: 0,
+    // left: 0,
+    // right: 0,
   },
 });
