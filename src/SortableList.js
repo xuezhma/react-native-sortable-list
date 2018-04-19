@@ -218,7 +218,7 @@ export default class SortableList extends Component {
   }
 
   _renderRows() {
-    const {horizontal, rowActivationTime, sortingEnabled, renderRow} = this.props;
+    const {horizontal, rowActivationTime, sortingEnabled, renderRow, showDeleteId} = this.props;
     const {animated, order, data, activeRowKey, releasedRowKey, rowsLayouts} = this.state;
 
 
@@ -261,7 +261,12 @@ export default class SortableList extends Component {
           onPress={this._onPressRow.bind(this, key)}
           onRelease={this._onReleaseRow.bind(this, key)}
           onMove={this._onMoveRow}
-          onDelete={() => this._onDelete(data[key].props.item.id)}
+          onDelete={() => this._onDelete(data[key].props.item)}
+          onStartDeleting={() => this._onStartDeleting(data[key].props.item.id)}
+          onQuitDeleting={() => this._onQuitDeleting(data[key].props.item.id)}
+          showingDelete={showDeleteId === data[key].props.item.id}
+          isDeletable={data[key].props.item.id || data[key].props.item.isLatestNavigationCard}
+          id={ data[key].props.item.id}
           manuallyActivateRows={this.props.manuallyActivateRows}>
           {renderRow({
             key,
@@ -622,8 +627,16 @@ export default class SortableList extends Component {
     if (this.props.onScrollBeginDrag) this.props.onScrollBeginDrag(contentOffset);
   });
 
-  _onDelete = id => {
-    if (this.props.onDelete) this.props.onDelete(id);
+  _onDelete = item => {
+    if (this.props.onDelete) this.props.onDelete(item);
+  }
+
+  _onStartDeleting = id => {
+    if (this.props.onStartDeleting) this.props.onStartDeleting(id);
+  }
+
+  _onQuitDeleting = id => {
+    if (this.props.onQuitDeleting) this.props.onQuitDeleting(id);
   }
 
   _onRefContainer = (component) => {

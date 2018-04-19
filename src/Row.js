@@ -1,7 +1,8 @@
 import React, {Component, cloneElement} from 'react';
 import PropTypes from 'prop-types';
-import {Animated, PanResponder, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import {Animated, PanResponder, StyleSheet, Text, TouchableOpacity, Dimensions} from 'react-native';
 import {shallowEqual} from './utils';
+const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
 
 export default class Row extends Component {
   static propTypes = {
@@ -149,13 +150,25 @@ export default class Row extends Component {
   });
 
   componentWillReceiveProps(nextProps) {
+    const animated = !this._active && nextProps.animated;
     if (!this._active && !shallowEqual(this._location, nextProps.location)) {
-      const animated = !this._active && nextProps.animated;
       if (this._totalMovment <  -75) {
+        this.showingDelete = true
+        this.props.onStartDeleting()
         this._relocate({...nextProps.location, x: -170}, true)
       } else {
+
+        if (this.showingDelete) {
+          this.showingDelete = false
+          this.props.onQuitDeleting()
+        }
         this._relocate(nextProps.location, animated)
       }
+    }
+
+    if (nextProps.showingDelete === false && this.props.showingDelete) {
+      this.showingDelete = false
+      this._relocate(nextProps.location, animated)
     }
   }
 
@@ -174,7 +187,7 @@ export default class Row extends Component {
   }
 
   render() {
-    const {children, style, horizontal, onDelete} = this.props;
+    const {children, style, horizontal, onDelete, showingDelete} = this.props;
     const rowStyle = [
       style, styles.container, this._animatedLocation.getLayout(),
       horizontal ? styles.horizontalContainer : styles.verticalContainer,
@@ -219,6 +232,7 @@ export default class Row extends Component {
   }
 
   _toggleActive = (e, gestureState) => {
+    if (!this.props.isDeletable) return
     const callback = this._active ? this.props.onRelease : this.props.onActivate;
 
     this._active = !this._active;
