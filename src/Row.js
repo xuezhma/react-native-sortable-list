@@ -48,7 +48,6 @@ export default class Row extends Component {
 
   _panResponder = PanResponder.create({
     onStartShouldSetPanResponder: (e, gestureState) => {
-      this._isMovingHorizontal = null;
       this._totalMovment = 0;
       return !this._isDisabled()
     },
@@ -101,16 +100,8 @@ export default class Row extends Component {
       }
 
       const elementMove = this._mapGestureToMove(this._prevGestureState, gestureState);
-      if (this._isMovingHorizontal === null ) {
-        this._isMovingHorizontal = Math.abs(elementMove.dx) > Math.abs(elementMove.dy)
-      }
-      if (this._isMovingHorizontal) {
-        this.moveBy({dx: elementMove.dx})
-        this._totalMovment += elementMove.dx
-      } else {
-        this.moveBy({dy: elementMove.dy})
-        this._totalMovment += elementMove.dy
-      }
+      this.moveBy({dx: elementMove.dx, dy: elementMove.dy})
+      this._totalMovment += elementMove.dx
       this._prevGestureState = {...gestureState};
 
       if (this.props.onMove) {
