@@ -240,6 +240,7 @@ export default class Row extends Component {
         toValue: nextLocation,
         duration: 300,
       }).start(() => {
+        if (this._totalMovment) this._totalMovment = 0
         this._isAnimationRunning = false;
       });
     } else {
