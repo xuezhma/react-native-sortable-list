@@ -218,7 +218,7 @@ export default class SortableList extends Component {
   }
 
   _renderRows() {
-    const {horizontal, rowActivationTime, sortingEnabled, renderRow, showDeleteId} = this.props;
+    const {horizontal, rowActivationTime, sortingEnabled, renderRow, showDeleteId, maxY, minY} = this.props;
     const {animated, order, data, activeRowKey, releasedRowKey, rowsLayouts} = this.state;
 
 
@@ -266,7 +266,10 @@ export default class SortableList extends Component {
           onQuitDeleting={() => this._onQuitDeleting(data[key].props.item.id)}
           showingDelete={showDeleteId === data[key].props.item.id}
           isDeletable={data[key].props.item.id || data[key].props.item.isLatestNavigationCard}
-          id={ data[key].props.item.id}
+          isReorderable={data[key].props.item.id !== 1.41421356237 && data[key].props.item.id !== 3.14159265}
+          id={data[key].props.item.id}
+          maxY={maxY}
+          minY={minY}
           manuallyActivateRows={this.props.manuallyActivateRows}>
           {renderRow({
             key,

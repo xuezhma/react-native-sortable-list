@@ -101,13 +101,16 @@ export default class Row extends Component {
       }
 
       const elementMove = this._mapGestureToMove(this._prevGestureState, gestureState);
-      this.moveBy({dx: elementMove.dx, dy: elementMove.dy})
+      if (this.props.isReorderable) this.moveBy({dx: elementMove.dx, dy: elementMove.dy})
+      else this.moveBy({dx: elementMove.dx})
       this._totalMovment += elementMove.dx
       this._prevGestureState = {...gestureState};
 
       if (this.props.onMove) {
         this.props.onMove(e, gestureState, this._nextLocation);
       }
+
+      return false;
     },
 
     onPanResponderRelease: (e, gestureState) => {
@@ -117,7 +120,7 @@ export default class Row extends Component {
       } else {
         this._cancelLongPress();
 
-        if (this._isTouchInsideElement(e) && this.props.onPress) {
+        if (this._isTouchInsideElement(e) && this.props.onPress && this._totalMovment === 0) {
           this.props.onPress();
         }
       }
@@ -179,10 +182,23 @@ export default class Row extends Component {
   }
 
   moveBy({dx = 0, dy = 0, animated = false}) {
-    this._nextLocation = {
-      x: this._location.x + dx,
-      y: this._location.y + dy,
-    };
+    const maxY = this.props.maxY
+    const minY = this.props.minY
+    if (this.props.isReorderable) {
+      this._nextLocation = {
+        x: this._location.x + dx,
+        y: Math.max(Math.min(this._location.y + dy, maxY), minY),
+      };
+    } else {
+      this._nextLocation = {
+        x: this._location.x + dx,
+        y: this._location.y + dy
+      };
+    }
+
+    if (this._location.y + dy !== this._nextLocation.y) {
+      return this._toggleActive()
+    }
     this._relocate(this._nextLocation, animated);
   }
 
