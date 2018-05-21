@@ -16,6 +16,7 @@ uniqueRowKey.id = 0
 export default class SortableList extends Component {
   static propTypes = {
     data: PropTypes.oneOfType([PropTypes.array, PropTypes.object]).isRequired,
+    contentOffset: PropTypes.object,
     order: PropTypes.arrayOf(PropTypes.any),
     style: ViewPropTypes.style,
     contentContainerStyle: ViewPropTypes.style,
@@ -180,7 +181,7 @@ export default class SortableList extends Component {
   }
 
   render() {
-    let {contentContainerStyle, innerContainerStyle, horizontal, style} = this.props;
+    let {contentContainerStyle, innerContainerStyle, horizontal, style, contentOffset} = this.props;
     const {animated, contentHeight, contentWidth, scrollEnabled} = this.state;
     const containerStyle = StyleSheet.flatten([style, {opacity: Number(animated)}])
     innerContainerStyle = [
@@ -199,6 +200,7 @@ export default class SortableList extends Component {
     return (
       <View style={containerStyle} ref={this._onRefContainer}>
         <ScrollView
+          contentOffset={contentOffset}
           refreshControl={refreshControl}
           ref={this._onRefScrollView}
           horizontal={horizontal}
